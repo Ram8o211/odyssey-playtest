@@ -108,13 +108,9 @@ jobs:
 
           replace(
               'src/mobile/MobileInputController.ts',
+              '      const primaryKey = keyNames[0];',
               '''      const primaryKey = keyNames[0];
-
-              button.addEventListener('pointerdown', (e: Event) => {''',
-              '''      const primaryKey = keyNames[0];
-              if (!primaryKey) return;
-
-              button.addEventListener('pointerdown', (e: Event) => {''',
+              if (!primaryKey) return;''',
               count=1,
           )
 
