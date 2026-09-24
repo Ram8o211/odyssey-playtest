@@ -1,6 +1,6 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
-# Public Pages follows the active Odyssey vertical-slice branch for playtesting.
+# Public Pages follows odyssey-homeward-survival/main, the source of truth.
 
 on:
   workflow_dispatch:
@@ -50,7 +50,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: Ram8o211/odyssey-homeward-survival
-          ref: feature/odyssey-vertical-slice
+          ref: main
           token: ${{ secrets.ODYSSEY_SOURCE_TOKEN }}
           path: source
           fetch-depth: 1
