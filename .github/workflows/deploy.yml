@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Checkout playtest repository
         uses: actions/checkout@v6
+        with:
+          ref: main
 
       - name: Check private source token
         id: token
@@ -110,8 +112,11 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Checkout playtest repository
+      - name: Checkout latest playtest repository state
         uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
 
       - name: Record deployed Odyssey source commit
         shell: bash
@@ -126,4 +131,5 @@ jobs:
             exit 0
           fi
           git commit -m "Record deployed Odyssey source commit"
-          git push
+          git pull --rebase origin main
+          git push origin HEAD:main
