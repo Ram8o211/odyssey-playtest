@@ -1,6 +1,6 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
-# Source refresh requested after camera framing fix.
+# Source refresh requested after mobile HUD, chart and framing fix.
 
 on:
   workflow_dispatch:
