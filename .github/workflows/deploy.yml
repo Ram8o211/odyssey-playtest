@@ -80,13 +80,13 @@ jobs:
         working-directory: source
         run: npm ci --no-audit --no-fund
 
-      - name: Build public playtest
+      - name: Build public playtest runtime
         if: steps.change.outputs.changed == 'true'
         working-directory: source
         env:
           VITE_BASE_PATH: /odyssey-playtest/
           PUBLIC_PLAYTEST: '1'
-        run: npm run build
+        run: npx vite build
 
       - name: Configure GitHub Pages
         if: steps.change.outputs.changed == 'true'
