@@ -1,4 +1,5 @@
 name: Deploy Odyssey playtest
+# Public mirror deployment for the private Odyssey source.
 
 on:
   workflow_dispatch:
