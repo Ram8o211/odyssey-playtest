@@ -1,6 +1,6 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
-# Temporary source validation for feat/ship-architecture-v2.
+# Source refresh requested after ship architecture v2 integration.
 
 on:
   workflow_dispatch:
@@ -50,7 +50,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: Ram8o211/odyssey-homeward-survival
-          ref: feat/ship-architecture-v2
+          ref: main
           token: ${{ secrets.ODYSSEY_SOURCE_TOKEN }}
           path: source
           fetch-depth: 1
