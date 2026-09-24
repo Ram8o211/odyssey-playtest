@@ -1,6 +1,6 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
-# Source refresh requested after enforced mobile ship framing fix.
+# Source refresh requested after tighter mobile ship framing tuning.
 
 on:
   workflow_dispatch:
