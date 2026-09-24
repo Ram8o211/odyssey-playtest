@@ -98,13 +98,11 @@ jobs:
 
           replace(
               'src/game/rendering/GraphicsCuller.ts',
-              '''    if (camera.rotation !== 0) {
-              const radius = Math.hypot(halfWidth, halfHeight);''',
+              '    if (camera.rotation !== 0) {',
               '''    const cameraRotation = 'rotation' in camera && typeof camera.rotation === 'number'
               ? camera.rotation
               : 0;
-            if (cameraRotation !== 0) {
-              const radius = Math.hypot(halfWidth, halfHeight);''',
+            if (cameraRotation !== 0) {''',
               count=1,
           )
 
