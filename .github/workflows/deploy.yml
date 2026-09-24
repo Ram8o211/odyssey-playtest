@@ -86,7 +86,7 @@ jobs:
         env:
           VITE_BASE_PATH: /odyssey-playtest/
           PUBLIC_PLAYTEST: '1'
-        run: npx vite build
+        run: npm run build
 
       - name: Configure GitHub Pages
         if: steps.change.outputs.changed == 'true'
