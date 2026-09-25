@@ -1,0 +1,101 @@
+name: Repair private Odyssey lint gate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/repair-private-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout private Odyssey repair branch
+        uses: actions/checkout@v4
+        with:
+          repository: Ram8o211/odyssey-homeward-survival
+          ref: fix/ship-sail-hull-prow-reference
+          token: ${{ secrets.ODYSSEY_SOURCE_TOKEN }}
+          path: source
+          fetch-depth: 1
+
+      - name: Apply deterministic lint repairs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          root = Path('source')
+
+          type_import_files = [
+              'src/game/BoarReferenceArtPatch.ts',
+              'src/game/HerbivoreReferenceArtPatch.ts',
+              'src/game/MeadowGrassletContrastPatch.ts',
+              'src/game/ShoreTallGrassVisibilityPatch.ts',
+              'src/game/ShoreTransitionCompositingPatch.ts',
+          ]
+          for rel in type_import_files:
+              path = root / rel
+              text = path.read_text()
+              old = "import Phaser from 'phaser';"
+              new = "import type Phaser from 'phaser';"
+              if old in text:
+                  text = text.replace(old, new, 1)
+                  path.write_text(text)
+              elif new not in text:
+                  raise SystemExit(f'Unexpected Phaser import in {rel}')
+
+          replacements = {
+              'src/game/PixelatedReferenceTerrainPatch.ts': (
+                  "    _grassBase: number,\n  ): void {\n    drawPixelatedTransition",
+                  "    _grassBase: number,\n  ): void {\n    void _sandBase;\n    void _grassBase;\n    drawPixelatedTransition",
+              ),
+              'src/game/ReferenceGroundGrassPatch.ts': (
+                  "    _base: number,\n  ): void {\n    const bridge",
+                  "    _base: number,\n  ): void {\n    void _base;\n    const bridge",
+              ),
+              'src/game/ReferenceGroundHillSafetyPatch.ts': (
+                  "    _radiusScale: number,\n  ): TerrainPolygonPoint[] {\n    return suppressedHillPolygon",
+                  "    _radiusScale: number,\n  ): TerrainPolygonPoint[] {\n    void _radiusScale;\n    return suppressedHillPolygon",
+              ),
+              'src/game/UnifiedIslandSurfacePatch.ts': (
+                  "    _seed: string,\n  ): void {\n    // Intentionally empty",
+                  "    _seed: string,\n  ): void {\n    void _snapshot;\n    void _seed;\n    // Intentionally empty",
+              ),
+          }
+
+          for rel, (old, new) in replacements.items():
+              path = root / rel
+              text = path.read_text()
+              if old in text:
+                  path.write_text(text.replace(old, new, 1))
+              elif new not in text:
+                  raise SystemExit(f'Expected lint repair anchor missing in {rel}')
+          PY
+
+          git -C source diff --check
+
+      - name: Commit and push lint repairs
+        shell: bash
+        run: |
+          git -C source config user.name "github-actions[bot]"
+          git -C source config user.email "418982821+github-actions[bot]@users.noreply.github.com"
+          git -C source add \
+            src/game/BoarReferenceArtPatch.ts \
+            src/game/HerbivoreReferenceArtPatch.ts \
+            src/game/MeadowGrassletContrastPatch.ts \
+            src/game/PixelatedReferenceTerrainPatch.ts \
+            src/game/ReferenceGroundGrassPatch.ts \
+            src/game/ReferenceGroundHillSafetyPatch.ts \
+            src/game/ShoreTallGrassVisibilityPatch.ts \
+            src/game/ShoreTransitionCompositingPatch.ts \
+            src/game/UnifiedIslandSurfacePatch.ts
+          if git -C source diff --cached --quiet; then
+            echo "Lint repairs already present."
+            exit 0
+          fi
+          git -C source commit -m "chore: restore lint-clean quality gate"
+          git -C source push origin HEAD:fix/ship-sail-hull-prow-reference
