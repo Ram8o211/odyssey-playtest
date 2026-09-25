@@ -1,9 +1,8 @@
 name: Validate private Odyssey source
 
-# GitHub-hosted runners for the private source repository have repeatedly failed
-# before a runner is assigned. This public bridge already has a working runner
-# and a token that can checkout the private source, so it acts as the durable CI
-# execution surface without publishing the source tree.
+# Durable CI bridge for the private Odyssey repository. The private repository's
+# hosted jobs have repeatedly failed before runner assignment; this repository
+# has a working hosted runner and read-only private-source token.
 on:
   workflow_dispatch:
     inputs:
@@ -98,6 +97,8 @@ jobs:
           fi
 
       - name: Typecheck
+        id: typecheck
+        continue-on-error: true
         working-directory: source
         shell: bash
         run: |
@@ -109,6 +110,8 @@ jobs:
           fi
 
       - name: Lint
+        id: lint
+        continue-on-error: true
         working-directory: source
         shell: bash
         run: |
@@ -125,6 +128,8 @@ jobs:
           fi
 
       - name: Unit and regression tests
+        id: unit_tests
+        continue-on-error: true
         working-directory: source
         shell: bash
         run: |
@@ -145,6 +150,8 @@ jobs:
           fi
 
       - name: Production build
+        id: build
+        continue-on-error: true
         working-directory: source
         shell: bash
         run: |
@@ -156,6 +163,8 @@ jobs:
           fi
 
       - name: Install Playwright Chromium
+        id: playwright_install
+        continue-on-error: true
         working-directory: source
         shell: bash
         run: |
@@ -167,6 +176,9 @@ jobs:
           fi
 
       - name: End-to-end tests
+        id: e2e
+        if: always() && steps.playwright_install.outcome == 'success'
+        continue-on-error: true
         working-directory: source
         shell: bash
         run: |
@@ -176,6 +188,32 @@ jobs:
             echo "::error::Playwright E2E failed; source output intentionally suppressed on the public CI bridge."
             exit 1
           fi
+
+      - name: Enforce quality gate
+        id: gate
+        if: always()
+        shell: bash
+        env:
+          TYPECHECK: ${{ steps.typecheck.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+          UNIT_TESTS: ${{ steps.unit_tests.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+          PLAYWRIGHT_INSTALL: ${{ steps.playwright_install.outcome }}
+          E2E: ${{ steps.e2e.outcome }}
+        run: |
+          FAILED=0
+          for CHECK in TYPECHECK LINT UNIT_TESTS BUILD PLAYWRIGHT_INSTALL E2E; do
+            VALUE="${!CHECK}"
+            echo "$CHECK=$VALUE"
+            if [ "$VALUE" != "success" ]; then
+              FAILED=1
+            fi
+          done
+          if [ "$FAILED" -ne 0 ]; then
+            echo "::error::Odyssey quality gate failed."
+            exit 1
+          fi
+          echo "Odyssey quality gate passed."
 
       - name: Record validated private commit
         if: success()
