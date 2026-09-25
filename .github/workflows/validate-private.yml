@@ -128,10 +128,19 @@ jobs:
         working-directory: source
         shell: bash
         run: |
-          if npm run test > /tmp/odyssey-tests.log 2>&1; then
+          set +e
+          npx vitest run --reporter=json --outputFile=/tmp/odyssey-vitest.json > /tmp/odyssey-vitest-run.log 2>&1
+          STATUS=$?
+          set -e
+          if [ "$STATUS" -eq 0 ]; then
             echo "Vitest suite passed."
           else
-            echo "::error::Vitest failed; source output intentionally suppressed on the public CI bridge."
+            echo "::error::Vitest failed. Failed test names below exclude source contents and stack traces."
+            if [ -s /tmp/odyssey-vitest.json ]; then
+              jq -r '.testResults[]? | select(.status == "failed") | ((.name | sub("^.*/source/"; "")) as $file | $file), (.assertionResults[]? | select(.status == "failed") | "  - \(.fullName // .title // "unnamed test")")' /tmp/odyssey-vitest.json | head -100
+            else
+              echo "Vitest did not produce a JSON report."
+            fi
             exit 1
           fi
 
