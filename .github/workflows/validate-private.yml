@@ -1,0 +1,204 @@
+name: Validate private Odyssey source
+
+# GitHub-hosted runners for the private source repository have repeatedly failed
+# before a runner is assigned. This public bridge already has a working runner
+# and a token that can checkout the private source, so it acts as the durable CI
+# execution surface without publishing the source tree.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Private Odyssey branch, tag or commit to validate
+        required: false
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/validate-private.yml'
+      - '.validation-source-ref'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: odyssey-private-quality
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout CI bridge
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Resolve private source ref
+        id: target
+        shell: bash
+        env:
+          DISPATCH_REF: ${{ inputs.ref }}
+        run: |
+          if [ -n "$DISPATCH_REF" ]; then
+            SOURCE_REF="$DISPATCH_REF"
+          else
+            SOURCE_REF="$(tr -d '\r\n' < .validation-source-ref)"
+          fi
+          if [ -z "$SOURCE_REF" ]; then
+            echo "::error::No private source ref configured."
+            exit 1
+          fi
+          echo "ref=$SOURCE_REF" >> "$GITHUB_OUTPUT"
+          echo "Validating configured private Odyssey ref."
+
+      - name: Verify private source token
+        shell: bash
+        env:
+          SOURCE_TOKEN: ${{ secrets.ODYSSEY_SOURCE_TOKEN }}
+        run: |
+          if [ -z "$SOURCE_TOKEN" ]; then
+            echo "::error::ODYSSEY_SOURCE_TOKEN is not configured."
+            exit 1
+          fi
+
+      - name: Checkout private Odyssey source
+        uses: actions/checkout@v4
+        with:
+          repository: Ram8o211/odyssey-homeward-survival
+          ref: ${{ steps.target.outputs.ref }}
+          token: ${{ secrets.ODYSSEY_SOURCE_TOKEN }}
+          path: source
+          fetch-depth: 1
+
+      - name: Resolve source commit
+        id: source
+        shell: bash
+        run: |
+          SOURCE_SHA="$(git -C source rev-parse HEAD)"
+          echo "sha=$SOURCE_SHA" >> "$GITHUB_OUTPUT"
+          echo "Private source checkout resolved successfully."
+
+      - name: Mark private commit validation pending
+        continue-on-error: true
+        shell: bash
+        env:
+          SOURCE_TOKEN: ${{ secrets.ODYSSEY_SOURCE_TOKEN }}
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+        run: |
+          TARGET_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          payload="$(jq -nc --arg state pending --arg target_url "$TARGET_URL" --arg description 'External Odyssey quality gate running' --arg context 'external-ci/quality' '{state:$state,target_url:$target_url,description:$description,context:$context}')"
+          curl --fail -sS -X POST \
+            -H "Authorization: Bearer $SOURCE_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/Ram8o211/odyssey-homeward-survival/statuses/$SOURCE_SHA" \
+            -d "$payload" >/dev/null
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+
+      - name: Install dependencies
+        working-directory: source
+        shell: bash
+        run: |
+          if npm ci --no-audit --no-fund > /tmp/odyssey-npm-ci.log 2>&1; then
+            echo "npm ci passed."
+          else
+            echo "::error::npm ci failed; source output intentionally suppressed on the public CI bridge."
+            exit 1
+          fi
+
+      - name: Typecheck
+        working-directory: source
+        shell: bash
+        run: |
+          if npm run typecheck > /tmp/odyssey-typecheck.log 2>&1; then
+            echo "Typecheck passed."
+          else
+            echo "::error::Typecheck failed; source output intentionally suppressed on the public CI bridge."
+            exit 1
+          fi
+
+      - name: Lint
+        working-directory: source
+        shell: bash
+        run: |
+          if npm run lint > /tmp/odyssey-lint.log 2>&1; then
+            echo "Lint passed."
+          else
+            echo "::error::Lint failed; source output intentionally suppressed on the public CI bridge."
+            exit 1
+          fi
+
+      - name: Unit and regression tests
+        working-directory: source
+        shell: bash
+        run: |
+          if npm run test > /tmp/odyssey-tests.log 2>&1; then
+            echo "Vitest suite passed."
+          else
+            echo "::error::Vitest failed; source output intentionally suppressed on the public CI bridge."
+            exit 1
+          fi
+
+      - name: Production build
+        working-directory: source
+        shell: bash
+        run: |
+          if npm run build > /tmp/odyssey-build.log 2>&1; then
+            echo "Production build passed."
+          else
+            echo "::error::Build failed; source output intentionally suppressed on the public CI bridge."
+            exit 1
+          fi
+
+      - name: Install Playwright Chromium
+        working-directory: source
+        shell: bash
+        run: |
+          if npx playwright install --with-deps chromium > /tmp/odyssey-playwright-install.log 2>&1; then
+            echo "Playwright Chromium installed."
+          else
+            echo "::error::Playwright installation failed."
+            exit 1
+          fi
+
+      - name: End-to-end tests
+        working-directory: source
+        shell: bash
+        run: |
+          if npm run test:e2e > /tmp/odyssey-e2e.log 2>&1; then
+            echo "Playwright E2E passed."
+          else
+            echo "::error::Playwright E2E failed; source output intentionally suppressed on the public CI bridge."
+            exit 1
+          fi
+
+      - name: Publish private commit validation result
+        if: always() && steps.source.outputs.sha != ''
+        continue-on-error: true
+        shell: bash
+        env:
+          SOURCE_TOKEN: ${{ secrets.ODYSSEY_SOURCE_TOKEN }}
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          if [ "$JOB_STATUS" = "success" ]; then
+            STATE="success"
+            DESCRIPTION="External Odyssey quality gate passed"
+          else
+            STATE="failure"
+            DESCRIPTION="External Odyssey quality gate failed"
+          fi
+          TARGET_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          payload="$(jq -nc --arg state "$STATE" --arg target_url "$TARGET_URL" --arg description "$DESCRIPTION" --arg context 'external-ci/quality' '{state:$state,target_url:$target_url,description:$description,context:$context}')"
+          curl --fail -sS -X POST \
+            -H "Authorization: Bearer $SOURCE_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/Ram8o211/odyssey-homeward-survival/statuses/$SOURCE_SHA" \
+            -d "$payload" >/dev/null
