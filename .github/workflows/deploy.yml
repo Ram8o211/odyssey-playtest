@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: shoreline pebble pass 64e997d.
+# Manual sync trigger: shoreline single-owner banding fix 246a850.
 
 on:
   workflow_dispatch:
