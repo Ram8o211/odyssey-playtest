@@ -1,4 +1,4 @@
-name: Coastline temporary visual QA (swash and mobile tap)
+name: Coastline temporary visual QA (cove alignment)
 
 on:
   push:
