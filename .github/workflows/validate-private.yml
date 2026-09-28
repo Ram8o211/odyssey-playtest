@@ -182,10 +182,19 @@ jobs:
         working-directory: source
         shell: bash
         run: |
-          if npm run test:e2e > /tmp/odyssey-e2e.log 2>&1; then
+          set +e
+          npx playwright test --reporter=json > /tmp/odyssey-e2e.json 2>/tmp/odyssey-e2e-stderr.log
+          STATUS=$?
+          set -e
+          if [ "$STATUS" -eq 0 ]; then
             echo "Playwright E2E passed."
           else
-            echo "::error::Playwright E2E failed; source output intentionally suppressed on the public CI bridge."
+            echo "::error::Playwright E2E failed. Failed test titles below exclude source contents and stack traces."
+            if [ -s /tmp/odyssey-e2e.json ]; then
+              jq -r '.. | objects | select(.status? == "failed" and .title?) | .title' /tmp/odyssey-e2e.json | sort -u | head -40
+            else
+              echo "Playwright did not produce a JSON report."
+            fi
             exit 1
           fi
 
