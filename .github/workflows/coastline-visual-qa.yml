@@ -1,4 +1,4 @@
-name: Coastline temporary visual QA (fragmented foam)
+name: Coastline temporary visual QA (touch actions)
 
 on:
   push:
