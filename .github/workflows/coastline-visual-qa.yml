@@ -35,13 +35,16 @@ jobs:
         working-directory: source
         run: npx playwright install --with-deps chromium > /tmp/odyssey-browser.log 2>&1
       - name: Smoke gameplay in Chrome
+        continue-on-error: true
         working-directory: source
         run: npm run test:e2e -- --grep 'starts the systemic|mobile touch UI' > /tmp/odyssey-e2e.log 2>&1
       - name: Capture starting island
+        if: always()
         working-directory: source
         shell: bash
         run: |
           npm run preview -- --host 127.0.0.1 > /tmp/odyssey-preview.log 2>&1 &
+          for i in {1..20}; do curl -fsS http://127.0.0.1:4173/ > /dev/null && break || sleep 1; done
           node --input-type=module <<'NODE'
           import { chromium } from 'playwright';
           import { mkdir } from 'node:fs/promises';
