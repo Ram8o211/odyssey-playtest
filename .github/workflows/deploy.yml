@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: bidirectional shoreline dissolve merge 3b225dc3.
+# Manual sync trigger: smoothed shoreline gradient merge 6662e65a.
 
 on:
   workflow_dispatch:
