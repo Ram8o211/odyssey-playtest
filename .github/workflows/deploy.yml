@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: shoreline micro-dither merge fc415fe9.
+# Manual sync trigger: shoreline screen-space feather merge f8bb853a.
 
 on:
   workflow_dispatch:
