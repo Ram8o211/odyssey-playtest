@@ -143,6 +143,8 @@ jobs:
             echo "::error::Vitest failed. Failed test names below exclude source contents and stack traces."
             if [ -s /tmp/odyssey-vitest.json ]; then
               jq -r '.testResults[]? | select(.status == "failed") | ((.name | sub("^.*/source/"; "")) as $file | $file), (.assertionResults[]? | select(.status == "failed") | "  - \(.fullName // .title // "unnamed test")")' /tmp/odyssey-vitest.json | head -100
+              SUMMARY="$(jq -r '.testResults[]? | select(.status == "failed") | ((.name | sub("^.*/source/"; "")) + " => " + ([.assertionResults[]? | select(.status == "failed") | (.fullName // .title // "unnamed test")] | join(" + ")))' /tmp/odyssey-vitest.json | head -20 | tr '\n' '|' | head -c 1800)"
+              echo "::warning title=Failed Vitest files (names only)::${SUMMARY}"
             else
               echo "Vitest did not produce a JSON report."
             fi
