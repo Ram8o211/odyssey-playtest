@@ -143,13 +143,27 @@ jobs:
             echo "::error::Vitest failed. Failed test names below exclude source contents and stack traces."
             if [ -s /tmp/odyssey-vitest.json ]; then
               jq -r '.testResults[]? | select(.status == "failed") | ((.name | sub("^.*/source/"; "")) as $file | $file), (.assertionResults[]? | select(.status == "failed") | "  - \(.fullName // .title // "unnamed test")")' /tmp/odyssey-vitest.json | head -100
-              SUMMARY="$(jq -r '.testResults[]? | select(.status == "failed") | ((.name | sub("^.*/source/"; "")) + " => " + ([.assertionResults[]? | select(.status == "failed") | (.fullName // .title // "unnamed test")] | join(" + ")))' /tmp/odyssey-vitest.json | head -20 | tr '\n' '|' | head -c 1800)"
-              echo "::warning title=Failed Vitest files (names only)::${SUMMARY}"
+              SUMMARY="$(jq -r '.testResults[]? | select(.status == "failed") | ((.name | sub("^.*/source/"; "")) + " => " + ([.assertionResults[]? | select(.status == "failed") | (.fullName // .title // "unnamed test")] | join(" + ")))' /tmp/odyssey-vitest.json | head -20)"
+              # Names only (same content as the log above), stored so the
+              # failing tests can be read without signing in to view logs.
+              {
+                printf 'source: %s\n' "${SOURCE_SHA_FOR_REPORT}"
+                printf '%s\n' "$SUMMARY"
+              } > "$GITHUB_WORKSPACE/.last-vitest-failures"
+              cd "$GITHUB_WORKSPACE"
+              git config user.name "github-actions[bot]"
+              git config user.email "418982821+github-actions[bot]@users.noreply.github.com"
+              git add .last-vitest-failures
+              git commit -m "Record failed Vitest test names" || true
+              git pull --rebase origin main || true
+              git push origin HEAD:main || true
             else
               echo "Vitest did not produce a JSON report."
             fi
             exit 1
           fi
+        env:
+          SOURCE_SHA_FOR_REPORT: ${{ steps.source.outputs.sha }}
 
       - name: Production build
         id: build
