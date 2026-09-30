@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: shoreline graphics/performance merge 40f3d6a2.
+# Manual sync trigger: continuous submerged beach merge d3cfd304.
 
 on:
   workflow_dispatch:
