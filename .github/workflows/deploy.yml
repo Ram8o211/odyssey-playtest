@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: transparent wave-driven water merge 767d8315.
+# Manual sync trigger: foam-locked blue-water merge 9d2e6dfc.
 
 on:
   workflow_dispatch:
