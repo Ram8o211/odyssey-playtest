@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: slower swash and persistent shoreline foam merge 9d5bebf2.
+# Manual sync trigger: natural NPC and animal animation merge 1da90484.
 
 on:
   workflow_dispatch:
