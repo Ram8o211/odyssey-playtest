@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: Ulisse animation, human size and feet merge 9e602fe6.
+# Manual sync trigger: finite gathering and shovel excavation merge 7935152b.
 
 on:
   workflow_dispatch:
