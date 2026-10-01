@@ -1,2 +1,2 @@
-source: 274450649b673878e64d382e6c41299b13ff1740
-tests/shoreline-system.test.ts => static shore material leaves tiles far from the coast empty
+source: a5973d2709d2717b201d6c42bd25eeebcf36b094
+tests/shoreline-foam-particles.test.ts => organic shoreline foam renders deterministic dense particle foam without the old continuous white line
