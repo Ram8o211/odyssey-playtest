@@ -208,7 +208,9 @@ jobs:
             echo "::error::Playwright E2E failed. Failed test titles below exclude source contents and stack traces."
             if [ -s /tmp/odyssey-e2e.json ]; then
               jq -r '.suites[]? | .. | objects | select(.specs?) | .specs[] | select(any(.tests[]?.results[]?; (.status == "failed" or .status == "timedOut" or .status == "interrupted"))) | .title' /tmp/odyssey-e2e.json | sort -u | head -40
-              echo "Playwright status counts:"
+              echo "Failure conditions (first line only; no source excerpts):"
+            jq -r '.suites[]? | .. | objects | .specs[]? | .tests[]?.results[]? | select(.status == "failed" or .status == "timedOut" or .status == "interrupted") | (.error.message // .errors[0].message // "") | split("\\n")[0]' /tmp/odyssey-e2e.json | sort -u | head -40
+            echo "Playwright status counts:"
               jq -r '[.suites[]? | .. | objects | .specs[]? | .tests[]?.results[]?.status] | group_by(.)[] | "  \(.[0]): \(length)"' /tmp/odyssey-e2e.json | head -20
             else
               echo "Playwright did not produce a JSON report."
