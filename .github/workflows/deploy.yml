@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: crafting and pixel-art inventory merge db7fe8ed.
+# Manual sync trigger: shoreline wave particles and clearer shallows merge c459ed12.
 
 on:
   workflow_dispatch:
