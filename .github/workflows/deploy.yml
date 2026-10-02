@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: scenery harvesting merge f627aa2d.
+# Manual sync trigger: natural animal grazing and carcasses merge 31a24441.
 
 on:
   workflow_dispatch:
