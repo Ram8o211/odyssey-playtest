@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: finite gathering and shovel excavation merge 7935152b.
+# Manual sync trigger: scenery harvesting merge f627aa2d.
 
 on:
   workflow_dispatch:
