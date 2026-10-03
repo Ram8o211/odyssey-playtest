@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: compact gameplay HUD merged as 0585e0ad30458e3ce958c53a6bac39728789fa1f.
+# Manual sync trigger: point-target projectile controls merged as feb20c7b1157f15dd8fcc5c022ef72726fc80383.
 
 on:
   workflow_dispatch:
