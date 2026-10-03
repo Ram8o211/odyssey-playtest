@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: completed hunting and combat merge de39386d.
+# Manual sync trigger: completed recoverable combat and wounds merge 3a7f7002097aba1a1d2401988c27adb10a272e63.
 
 on:
   workflow_dispatch:
