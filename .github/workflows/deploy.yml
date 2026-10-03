@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: TEST VOYAGE equipment kit merged as 4242bae504ef9693b958d3d73cd2912505bbe615.
+# Manual sync trigger: compact gameplay HUD merged as 0585e0ad30458e3ce958c53a6bac39728789fa1f.
 
 on:
   workflow_dispatch:
