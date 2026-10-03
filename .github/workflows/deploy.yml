@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: wildlife variety, rabbits and cats merge d3c7d90d.
+# Manual sync trigger: completed hunting and combat merge de39386d.
 
 on:
   workflow_dispatch:
