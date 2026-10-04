@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: quick slots and item use merged as ae037623ba4aae74f0e792b0aba82ad00c6b8f34.
+# Manual sync trigger: latest main 621b80ad35353cfe20a977336de813228adffe0d.
 
 on:
   workflow_dispatch:
@@ -128,7 +128,7 @@ jobs:
         run: |
           printf '%s\n' "$SOURCE_SHA" > .published-source-sha
           git config user.name "github-actions[bot]"
-          git config user.email "418982821+github-actions[bot]@users.noreply.github.com"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .published-source-sha
           if git diff --cached --quiet; then
             exit 0
