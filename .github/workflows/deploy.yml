@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: point-target projectile controls merged as feb20c7b1157f15dd8fcc5c022ef72726fc80383.
+# Manual sync trigger: quick slots and item use merged as ae037623ba4aae74f0e792b0aba82ad00c6b8f34.
 
 on:
   workflow_dispatch:
