@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: latest main cbd06b5c4d86cdf9521474dc01f31fdca4cc30ff.
+# Manual sync trigger: latest main 1fb6378a02a9e89cc09fecbcb7f0bceffce62716.
 
 on:
   workflow_dispatch:
