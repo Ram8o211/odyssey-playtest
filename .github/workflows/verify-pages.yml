@@ -1,0 +1,110 @@
+name: Verify published Odyssey playtest
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_bundle:
+        description: Optional expected JavaScript entry filename
+        required: false
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-pages.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: odyssey-playtest-live-verification
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout publication metadata
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install the source-tested browser version
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/odyssey-pages-smoke"
+          cd "$RUNNER_TEMP/odyssey-pages-smoke"
+          npm install --no-save --package-lock=false --no-audit --no-fund playwright@1.63.0
+          npx playwright install --with-deps chromium
+
+      - name: Verify the live desktop and touch runtime
+        working-directory: ${{ runner.temp }}/odyssey-pages-smoke
+        env:
+          PLAYTEST_URL: https://ram8o211.github.io/odyssey-playtest/
+          EXPECTED_BUNDLE: ${{ inputs.expected_bundle }}
+        shell: bash
+        run: |
+          node --input-type=module <<'JS'
+          import { chromium } from 'playwright';
+          import { readFile } from 'node:fs/promises';
+
+          const publishedSource = (await readFile(
+            process.env.GITHUB_WORKSPACE + '/.published-source-sha', 'utf8',
+          )).trim();
+          if (!/^[a-f0-9]{40}$/.test(publishedSource))
+            throw new Error('Published source metadata is missing');
+
+          const browser = await chromium.launch({
+            args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
+          });
+          try {
+            for (const mobile of [false, true]) {
+              const context = await browser.newContext({
+                viewport: mobile ? { width: 390, height: 844 } : { width: 1280, height: 900 },
+                isMobile: mobile,
+                hasTouch: mobile,
+              });
+              const page = await context.newPage();
+              const errors = [], failures = [];
+              page.on('pageerror', error => errors.push(error.message));
+              page.on('requestfailed', request => failures.push({
+                url: request.url(), error: request.failure()?.errorText,
+              }));
+              const response = await page.goto(process.env.PLAYTEST_URL, {
+                waitUntil: 'domcontentloaded', timeout: 90000,
+              });
+              await page.locator('canvas').waitFor({ state: 'visible', timeout: 60000 });
+              await page.locator('[data-action="newGame"]').waitFor({
+                state: 'visible', timeout: 60000,
+              });
+              if (mobile) await page.locator('[data-action="newGame"]').tap();
+              else await page.keyboard.press('N');
+              await page.locator('#quick-slots').waitFor({
+                state: 'visible', timeout: 60000,
+              });
+              await page.waitForTimeout(1000);
+              const meta = await page.evaluate(() => ({
+                title: document.title,
+                scripts: [...document.scripts].map(script => script.src)
+                  .filter(src => src.includes('/assets/index-')),
+                slots: document.querySelectorAll('#quick-slots [data-quick-slot]').length,
+              }));
+              console.log(JSON.stringify({
+                mobile, status: response?.status(), publishedSource, ...meta, errors, failures,
+              }));
+              const expected = process.env.EXPECTED_BUNDLE;
+              if (response?.status() !== 200 || errors.length || failures.length ||
+                  meta.slots !== 6 || meta.scripts.length !== 1 ||
+                  (expected && !meta.scripts[0].endsWith('/' + expected)))
+                throw new Error('Live playtest failed on ' + (mobile ? 'touch' : 'desktop'));
+              await context.close();
+            }
+          } finally {
+            await browser.close();
+          }
+          JS
