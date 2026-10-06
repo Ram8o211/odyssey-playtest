@@ -79,9 +79,6 @@ jobs:
                 waitUntil: 'domcontentloaded', timeout: 90000,
               });
               await page.locator('canvas').waitFor({ state: 'visible', timeout: 60000 });
-              await page.locator('[data-action="newGame"]').waitFor({
-                state: 'visible', timeout: 60000,
-              });
               if (mobile) await page.locator('[data-action="newGame"]').tap();
               else await page.keyboard.press('N');
               await page.locator('#quick-slots').waitFor({
