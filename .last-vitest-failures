@@ -1,2 +1,2 @@
-source: a5973d2709d2717b201d6c42bd25eeebcf36b094
-tests/shoreline-foam-particles.test.ts => organic shoreline foam renders deterministic dense particle foam without the old continuous white line
+source: 5f9fa4c84ff235b4ef1e374829ceb5730d51bb71
+tests/island-relief.test.ts => relief rendering budget bakes actual pixel contours into bounded reusable strips on large village and forest islands
