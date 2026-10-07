@@ -1,5 +1,5 @@
 name: Verify published Odyssey playtest
-# Manual verification: source b539390e6542fcace45a2bb77d977acccfb7ff0e; expected bundle index-DD2S1kmb.js.
+# Manual verification: source 2f263e08a674b3f6dcf995e42ca3021bc3d736b9; expected bundle undefined.
 
 on:
   workflow_dispatch:
