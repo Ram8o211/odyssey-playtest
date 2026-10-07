@@ -1,4 +1,5 @@
 name: Verify published Odyssey playtest
+# Manual verification: source da7201461f3b3fd1771cc45762b5ea828c7c5f45; expected bundle index-CVVsIFOv.js.
 
 on:
   workflow_dispatch:
