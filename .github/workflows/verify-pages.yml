@@ -1,5 +1,5 @@
 name: Verify published Odyssey playtest
-# Manual verification: source 44d54069e4803021089d84529404c2c6114cdde0; fractured rock surfaces.
+# Manual verification: source 9e6a2d4576faee5f1da27b3e0b5a51ceb8088718; mixed rounded and pointed rocks.
 
 on:
   workflow_dispatch:
