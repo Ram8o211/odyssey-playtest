@@ -1,3 +1,3 @@
-source: c523c376b5668d1fa266eccbf50aefdc17919c72
-tests/pointed-rock-clusters.test.ts => pointed coastal rock clusters recreates varied continuously tapered groups with rope contacts on the actual face
+source: 89b7f2da4070699dbf5e18d9d1f032994b33548f
+tests/pointed-rock-clusters.test.ts => pointed coastal rock clusters recreates varied continuously tapered groups with rope contacts on the actual face + pointed coastal rock clusters rasterizes irregular natural rock silhouettes at native resolution + pointed coastal rock clusters carves pronounced but continuous seeded facets without changing rope-anchor footprints
 tests/scenery-gathering.test.ts => gathering the existing scenery gives every visible resource a stable, serializable physical source and adds no duplicate pickups
