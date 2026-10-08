@@ -1,5 +1,5 @@
 name: Verify published Odyssey playtest
-# Manual verification: source 7f780599c429d58d8c3097dc132edf31433fbbb0; expected bundle undefined.
+# Manual verification: source 44d54069e4803021089d84529404c2c6114cdde0; fractured rock surfaces.
 
 on:
   workflow_dispatch:
