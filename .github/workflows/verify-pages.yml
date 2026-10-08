@@ -1,5 +1,5 @@
 name: Verify published Odyssey playtest
-# Manual verification: source 9e6a2d4576faee5f1da27b3e0b5a51ceb8088718; mixed rounded and pointed rocks.
+# Manual verification: source 7fec777202abcc2ccfd3b38bc9d67da4855fbaa2; eroded angular boulder textures.
 
 on:
   workflow_dispatch:
