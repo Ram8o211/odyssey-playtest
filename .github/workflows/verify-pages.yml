@@ -1,5 +1,5 @@
 name: Verify published Odyssey playtest
-# Manual verification: source cae414001d42096270d6e964dd91e0c007e219f3; one clock-driven sun for terrain and exterior shadows; expected entry index-By4h7GgV.js.
+# Manual verification: source a67faa47f81f877a403ed19a169ff5e9cd63a5c5; diffuse shadows, moving moonlight and terrain artifact fixes; expected entry index-C5VlzM9e.js.
 
 on:
   workflow_dispatch:
@@ -47,7 +47,7 @@ jobs:
         working-directory: ${{ runner.temp }}/odyssey-pages-smoke
         env:
           PLAYTEST_URL: https://ram8o211.github.io/odyssey-playtest/
-          EXPECTED_BUNDLE: ${{ inputs.expected_bundle }}
+          EXPECTED_BUNDLE: ${{ inputs.expected_bundle || 'index-C5VlzM9e.js' }}
         shell: bash
         run: |
           node --input-type=module <<'JS'
