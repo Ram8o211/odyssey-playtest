@@ -1,3 +1,4 @@
-source: b554f799b2a6ea2199e36029979618c937a96c71
-tests/pointed-rock-clusters.test.ts => pointed coastal rock clusters keeps visibly uneven shoulders, a grounded base and distinct fracture tones + pointed coastal rock clusters carves pronounced but continuous seeded facets without changing rope-anchor footprints + pointed coastal rock clusters keeps root fractures darker than the upper limestone, with a broken five-pixel ground contact
-tests/scenery-gathering.test.ts => gathering the existing scenery gives every visible resource a stable, serializable physical source and adds no duplicate pickups
+source: 9c413e9713d2af118978eb10f2fe73a0e3f24921
+tests/pointed-rock-clusters.test.ts => pointed coastal rock clusters retains the strip and texture ceilings over additional large coast layouts
+tests/relief-texture-coherence.test.ts => raised terrain material coherence keeps bare mineral surfaces free of meadow overlays and material changes deterministic
+tests/terrain-transition-ecology.test.ts => natural details at terrain joins packs all natural detail within the existing strip and atlas limits on large village and forest islands
