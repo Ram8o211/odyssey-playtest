@@ -1,5 +1,5 @@
 name: Verify published Odyssey playtest
-# Manual verification: source a2678705862a3639b93f7d6d6ddd2ead00e481bc; coherent physical hills and dunes; expected entry index-Dub2SxDK.js.
+# Manual verification: source cae414001d42096270d6e964dd91e0c007e219f3; one clock-driven sun for terrain and exterior shadows; expected entry index-By4h7GgV.js.
 
 on:
   workflow_dispatch:
