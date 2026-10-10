@@ -1,5 +1,5 @@
 name: Verify published Odyssey playtest
-# Manual verification: source 7fec777202abcc2ccfd3b38bc9d67da4855fbaa2; eroded angular boulder textures.
+# Manual verification: source 7dee7207a9a586d34b97811c102dd0adf457bbb2; rolling islands and irregular relief crowns.
 
 on:
   workflow_dispatch:
