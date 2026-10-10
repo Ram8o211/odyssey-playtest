@@ -1,5 +1,5 @@
 name: Verify published Odyssey playtest
-# Manual verification: source ff76a257c345cd4d6a00e3254c233503025e0f9f; Mediterranean biomes; expected entry index-BYLOGelS.js.
+# Manual verification: source 427f279d23315743911ee5b0ce277dd5208080ba; biome hills, dunes and collectible visuals; expected entry index-D6oN_a9i.js.
 
 on:
   workflow_dispatch:
