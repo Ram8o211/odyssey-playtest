@@ -1,5 +1,5 @@
 name: Verify published Odyssey playtest
-# Manual verification: source 427f279d23315743911ee5b0ce277dd5208080ba; biome hills, dunes and collectible visuals; expected entry index-D6oN_a9i.js.
+# Manual verification: source a2678705862a3639b93f7d6d6ddd2ead00e481bc; coherent physical hills and dunes; expected entry index-Dub2SxDK.js.
 
 on:
   workflow_dispatch:
