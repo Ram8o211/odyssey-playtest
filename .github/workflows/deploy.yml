@@ -1,7 +1,7 @@
 name: Deploy Odyssey playtest
 # Public mirror deployment for the private Odyssey source.
 # Public Pages follows odyssey-homeward-survival/main, the source of truth.
-# Manual sync trigger: latest main a67faa47f81f877a403ed19a169ff5e9cd63a5c5; diffuse shadows, moving moonlight and terrain artifact fixes.
+# Manual sync trigger: latest main 08651bfda1ce883d48dfd96c419775a2b1316a89; fix village hill shadow discontinuity (#255).
 
 on:
   workflow_dispatch:
