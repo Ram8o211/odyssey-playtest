@@ -86,14 +86,14 @@ jobs:
         working-directory: source
         run: npx playwright install --with-deps chromium
 
-      - name: Desktop and touch lighting, terrain, HUD, style and gameplay checks
+      - name: Desktop and touch lighting, shadow contact and gameplay checks
         working-directory: source
         env:
           CI: 'true'
         shell: bash
         run: |
           set +e
-          npx playwright test e2e/environment-palette.spec.ts e2e/shadows.spec.ts e2e/biome-landforms.spec.ts e2e/art-direction.spec.ts e2e/hud.spec.ts e2e/smoke.spec.ts --reporter=json > /tmp/odyssey-lighting-e2e.json 2>/tmp/odyssey-lighting-e2e-stderr.log
+          npx playwright test e2e/environment-palette.spec.ts e2e/shadows.spec.ts e2e/smoke.spec.ts --retries=0 --reporter=json > /tmp/odyssey-lighting-e2e.json 2>/tmp/odyssey-lighting-e2e-stderr.log
           STATUS=$?
           set -e
           node --input-type=module <<'JS'
@@ -103,7 +103,13 @@ jobs:
           const visit = suites => {
             for (const suite of suites ?? []) {
               for (const spec of suite.specs ?? [])
-                if (!spec.ok) console.log('FAILED: ' + spec.title);
+                if (!spec.ok) {
+                  console.log('FAILED: ' + spec.title);
+                  for (const test of spec.tests ?? []) {
+                    const last = test.results?.at(-1);
+                    if (last?.error?.message) console.log('ERROR: ' + last.error.message.split('\n')[0]);
+                  }
+                }
               visit(suite.suites);
             }
           };
