@@ -72,6 +72,13 @@ jobs:
           echo "Lint passed."
           if ! npx vitest run --reporter=json --outputFile=/tmp/odyssey-lighting-vitest.json > /tmp/odyssey-lighting-unit.log 2>&1; then
             echo "::error::Unit/regression tests failed."
+            jq -c '{success, numTotalTests, numPassedTests, numFailedTests, numFailedTestSuites, numRuntimeErrorTestSuites}' /tmp/odyssey-lighting-vitest.json
+            node --input-type=module <<'JS'
+          import { readFileSync } from 'node:fs';
+          const log = readFileSync('/tmp/odyssey-lighting-unit.log', 'utf8').replace(/\x1b\[[0-9;]*m/g, '');
+          for (const line of log.split('\n'))
+            if (/^(?:\\s*(?:Error|TypeError|RangeError|SyntaxError|AssertionError|FatalError|FATAL ERROR|Unhandled Error|Unhandled Rejection|Worker exited|Test Files|Tests |Duration |Serialized Error|Caused by:|\\[vitest-pool))/.test(line)) console.log(line.slice(0, 300));
+          JS
             jq -r '.testResults[]? | select(.status == "failed") | (.name | sub("^.*/source/"; "")), (.assertionResults[]? | select(.status == "failed") | (.fullName // .title)), (.assertionResults[]? | select(.status == "failed") | .failureMessages[]? | split("\n")[0])' /tmp/odyssey-lighting-vitest.json | head -70
             exit 1
           fi
