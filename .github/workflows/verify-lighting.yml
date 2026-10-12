@@ -58,11 +58,29 @@ jobs:
       - name: Typecheck, lint, full unit suite and build
         working-directory: source
         run: |
-          if ! npm run check > /tmp/odyssey-lighting-check.log 2>&1; then
-            echo "::error::Quality checks failed; private source output suppressed."
+          if ! npm run typecheck > /tmp/odyssey-lighting-typecheck.log 2>&1; then
+            echo "::error::Typecheck failed."
+            head -60 /tmp/odyssey-lighting-typecheck.log
             exit 1
           fi
-          echo "Typecheck, lint, all unit/regression tests and production build passed."
+          echo "Typecheck passed."
+          if ! npx eslint . -f json > /tmp/odyssey-lighting-eslint.json 2>/tmp/odyssey-lighting-eslint.log; then
+            echo "::error::Lint failed."
+            jq -r '.[] | . as $file | .messages[] | select(.severity == 2) | "\($file.filePath | sub("^.*/source/"; "")):\(.line):\(.column) [\(.ruleId // "unknown")] \(.message)"' /tmp/odyssey-lighting-eslint.json | head -60
+            exit 1
+          fi
+          echo "Lint passed."
+          if ! npx vitest run --reporter=json --outputFile=/tmp/odyssey-lighting-vitest.json > /tmp/odyssey-lighting-unit.log 2>&1; then
+            echo "::error::Unit/regression tests failed."
+            jq -r '.testResults[]? | select(.status == "failed") | (.name | sub("^.*/source/"; "")), (.assertionResults[]? | select(.status == "failed") | (.fullName // .title)), (.assertionResults[]? | select(.status == "failed") | .failureMessages[]? | split("\n")[0])' /tmp/odyssey-lighting-vitest.json | head -70
+            exit 1
+          fi
+          jq -r '"Unit/regression tests passed: \(.numPassedTests) tests."' /tmp/odyssey-lighting-vitest.json
+          if ! npm run build > /tmp/odyssey-lighting-build.log 2>&1; then
+            echo "::error::Production build failed; private source output suppressed."
+            exit 1
+          fi
+          echo "Production build passed."
 
       - name: Install Chromium
         working-directory: source
