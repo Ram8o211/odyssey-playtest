@@ -1,0 +1,103 @@
+name: Verify Odyssey lighting and atmosphere
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-lighting.yml'
+      - '.lighting-source-ref'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: odyssey-private-quality
+  cancel-in-progress: true
+
+jobs:
+  lighting:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout verification request
+        uses: actions/checkout@v4
+
+      - name: Resolve source ref
+        id: source
+        shell: bash
+        run: |
+          SOURCE_REF="$(tr -d '\r\n' < .lighting-source-ref)"
+          test -n "$SOURCE_REF"
+          echo "ref=$SOURCE_REF" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout private Odyssey source
+        uses: actions/checkout@v4
+        with:
+          repository: Ram8o211/odyssey-homeward-survival
+          ref: ${{ steps.source.outputs.ref }}
+          token: ${{ secrets.ODYSSEY_SOURCE_TOKEN }}
+          path: source
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+
+      - name: Install dependencies
+        working-directory: source
+        run: |
+          if ! npm ci --no-audit --no-fund > /tmp/odyssey-lighting-install.log 2>&1; then
+            echo "::error::Dependency installation failed; private source output suppressed."
+            exit 1
+          fi
+
+      - name: Typecheck, lint, full unit suite and build
+        working-directory: source
+        run: |
+          if ! npm run check > /tmp/odyssey-lighting-check.log 2>&1; then
+            echo "::error::Quality checks failed; private source output suppressed."
+            exit 1
+          fi
+          echo "Typecheck, lint, all unit/regression tests and production build passed."
+
+      - name: Install Chromium
+        working-directory: source
+        run: npx playwright install --with-deps chromium
+
+      - name: Desktop and touch lighting, terrain, HUD, style and gameplay checks
+        working-directory: source
+        env:
+          CI: 'true'
+        shell: bash
+        run: |
+          set +e
+          npx playwright test e2e/environment-palette.spec.ts e2e/shadows.spec.ts e2e/biome-landforms.spec.ts e2e/art-direction.spec.ts e2e/hud.spec.ts e2e/smoke.spec.ts --reporter=json > /tmp/odyssey-lighting-e2e.json 2>/tmp/odyssey-lighting-e2e-stderr.log
+          STATUS=$?
+          set -e
+          node --input-type=module <<'JS'
+          import { readFileSync } from 'node:fs';
+          const report = JSON.parse(readFileSync('/tmp/odyssey-lighting-e2e.json', 'utf8'));
+          console.log(JSON.stringify(report.stats));
+          const visit = suites => {
+            for (const suite of suites ?? []) {
+              for (const spec of suite.specs ?? [])
+                if (!spec.ok) console.log('FAILED: ' + spec.title);
+              visit(suite.suites);
+            }
+          };
+          visit(report.suites);
+          JS
+          exit "$STATUS"
+
+      - name: Upload atmosphere and landform screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: odyssey-lighting-preview
+          path: source/test-results/**/*.png
+          if-no-files-found: ignore
+          retention-days: 7
