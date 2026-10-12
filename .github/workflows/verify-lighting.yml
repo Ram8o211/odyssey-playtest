@@ -77,7 +77,7 @@ jobs:
           import { readFileSync } from 'node:fs';
           const log = readFileSync('/tmp/odyssey-lighting-unit.log', 'utf8').replace(/\x1b\[[0-9;]*m/g, '');
           for (const line of log.split('\n'))
-            if (/^(?:\\s*(?:Error|TypeError|RangeError|SyntaxError|AssertionError|FatalError|FATAL ERROR|Unhandled Error|Unhandled Rejection|Worker exited|Test Files|Tests |Duration |Serialized Error|Caused by:|\\[vitest-pool))/.test(line)) console.log(line.slice(0, 300));
+            if (/^(?:Error|TypeError|RangeError|SyntaxError|AssertionError|FatalError|FATAL ERROR|Unhandled Error|Unhandled Rejection|Worker exited|Test Files|Tests |Duration |Serialized Error|Caused by:)/.test(line.trimStart()) || line.startsWith('[vitest-pool')) console.log(line.slice(0, 300));
           JS
             jq -r '.testResults[]? | select(.status == "failed") | (.name | sub("^.*/source/"; "")), (.assertionResults[]? | select(.status == "failed") | (.fullName // .title)), (.assertionResults[]? | select(.status == "failed") | .failureMessages[]? | split("\n")[0])' /tmp/odyssey-lighting-vitest.json | head -70
             exit 1
