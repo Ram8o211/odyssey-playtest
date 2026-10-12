@@ -1,4 +1,5 @@
-source: fd3272cc470b3584f40966691fed7a1558dfb9d4
+source: 07456fb57da7f14c5a7647d8225cc2352dca7b55
+tests/island-relief.test.ts => relief rendering budget bakes actual pixel contours into bounded reusable strips on large village and forest islands
 tests/pointed-rock-clusters.test.ts => pointed coastal rock clusters retains the strip and texture ceilings over additional large coast layouts
 tests/relief-texture-coherence.test.ts => raised terrain material coherence keeps bare mineral surfaces free of meadow overlays and material changes deterministic
 tests/terrain-transition-ecology.test.ts => natural details at terrain joins packs all natural detail within the existing strip and atlas limits on large village and forest islands
